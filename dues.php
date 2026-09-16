@@ -1,74 +1,74 @@
 <?php
-// dues.php
-require_once 'includes/header.php';
+$page_title = 'Expenses';
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/includes/header.php';
 
-$message = '';
-
-// Handle Clearing or Paying off Dues
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_due'])) {
-    $customer_id = intval($_POST['customer_id']);
-    $pay_amount = floatval($_POST['pay_amount']);
-
-    if ($customer_id > 0 && $pay_amount > 0) {
-        // Fetch current debt
-        $stmt = $pdo->prepare("SELECT dues_amount FROM customers WHERE id = ?");
-        $stmt->execute([$customer_id]);
-        $current_due = $stmt->fetchColumn() ?: 0;
-
-        $new_due = max(0, $current_due - $pay_amount);
-
-        // Update customer balance
-        $update = $pdo->prepare("UPDATE customers SET dues_amount = ? WHERE id = ?");
-        $update->execute([$new_due, $customer_id]);
-
-        $message = '<div style="color: var(--primary-green); font-weight: 600; margin-bottom: 10px;">Payment recorded! Remaining Debt: TSH ' . number_format($new_due, 0) . '</div>';
-    } else {
-        $message = '<div style="color: red; font-weight: 600; margin-bottom: 10px;">Please enter a valid payment amount.</div>';
-    }
-}
-
-// Fetch Customers with Active Dues (Debt > 0)
-$debtors = $pdo->query("SELECT * FROM customers WHERE dues_amount > 0 ORDER BY dues_amount DESC")->fetchAll();
-$total_unpaid_dues = $pdo->query("SELECT SUM(dues_amount) AS total FROM customers")->fetch()['total'] ?? 0;
+$expenses = [];
+$total = 0;
+try {
+    $expenses = $pdo->query("SELECT * FROM expenses ORDER BY id DESC LIMIT 50")->fetchAll();
+    $total = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM expenses")->fetchColumn();
+} catch (Exception $e) {}
 ?>
+<header class="leo-page-header">
+    <div class="leo-page-header-left">
+        <a href="index.php" class="leo-back-btn"><i class="fas fa-chevron-left"></i></a>
+        <span class="leo-page-header-title">Expenses List</span>
+    </div>
+    <div class="leo-page-header-actions">
+        <button class="leo-header-icon"><i class="fas fa-search"></i></button>
+    </div>
+</header>
 
-<!-- Total Dues Summary Header -->
-<div class="card" style="background: linear-gradient(135deg, #d32f2f, #9a0007); color: white;">
-    <div style="font-size: 13px; opacity: 0.9;">Total Unpaid Dues (Debts)</div>
-    <div style="font-size: 22px; font-weight: 700; margin-top: 4px;">TSH <?php echo number_format($total_unpaid_dues, 0); ?></div>
-</div>
-
-<!-- Dues List & Payment Action Card -->
-<div class="card">
-    <h3 style="font-size: 15px; color: #d32f2f; margin-bottom: 12px;"><i class="fa-solid fa-clipboard-list"></i> Customer Dues List</h3>
-    <?php echo $message; ?>
-
-    <?php if (empty($debtors)): ?>
-        <p style="color: var(--text-muted); font-size: 13px;">No outstanding debts recorded!</p>
-    <?php else: ?>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <?php foreach ($debtors as $debtor): ?>
-                <div style="padding: 12px; background: var(--bg-light); border-radius: 8px; border-left: 4px solid #d32f2f;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        <div>
-                            <strong style="font-size: 14px; display: block; color: var(--text-main);"><?php echo htmlspecialchars($debtor['customer_name']); ?></strong>
-                            <span style="font-size: 12px; color: var(--text-muted);"><i class="fa-solid fa-phone"></i> <?php echo htmlspecialchars($debtor['phone'] ?: 'No Phone'); ?></span>
-                        </div>
-                        <span style="font-weight: 700; color: #d32f2f; font-size: 15px;">TSH <?php echo number_format($debtor['dues_amount'], 0); ?></span>
-                    </div>
-
-                    <!-- Quick Pay Form -->
-                    <form action="dues.php" method="POST" style="display: flex; gap: 8px; margin-top: 8px;">
-                        <input type="hidden" name="customer_id" value="<?php echo $debtor['id']; ?>">
-                        <input type="number" step="0.01" name="pay_amount" placeholder="Amount Paid" required style="width: 60%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px;">
-                        <button type="submit" name="clear_due" style="width: 40%; background: var(--primary-green); color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                            Clear Debt
-                        </button>
-                    </form>
+<div style="padding:0.85rem;">
+    <!-- Filter -->
+    <div class="leo-report-filter">
+        <div class="leo-report-dates">
+            <div class="leo-report-date">
+                <div class="leo-report-date-label">From Date</div>
+                <div class="leo-report-date-value">
+                    <span><?php echo date('M j, Y'); ?></span>
+                    <i class="far fa-calendar-alt" style="margin-left:auto;"></i>
                 </div>
-            <?php endforeach; ?>
+            </div>
+            <div class="leo-report-date">
+                <div class="leo-report-date-label">To Date</div>
+                <div class="leo-report-date-value">
+                    <span><?php echo date('M j, Y'); ?></span>
+                    <i class="far fa-calendar-alt" style="margin-left:auto;"></i>
+                </div>
+            </div>
         </div>
-    <?php endif; ?>
+        <div class="leo-report-total">
+            <div class="leo-report-total-left">
+                <div class="leo-report-total-amount">TSH <?php echo number_format($total, 0); ?></div>
+                <div class="leo-report-total-label">Total Expenses</div>
+            </div>
+            <button class="leo-report-total-btn">Today <i class="fas fa-chevron-down"></i></button>
+        </div>
+    </div>
 </div>
 
-<?php require_once 'includes/nav.php'; ?>
+<?php if (empty($expenses)): ?>
+<div class="leo-empty">
+    <div class="leo-empty-img"><i class="fas fa-wallet"></i></div>
+    <h4>No data available</h4>
+</div>
+<?php else: ?>
+<div class="leo-section-card" style="margin:0 0.85rem;">
+    <?php foreach ($expenses as $e): ?>
+    <div class="leo-person-item">
+        <div class="leo-person-avatar" style="background:#FEF0F0;color:#EF4444;"><i class="fas fa-wallet"></i></div>
+        <div class="leo-person-body">
+            <div class="leo-person-name"><?php echo htmlspecialchars($e['title'] ?? 'Expense'); ?></div>
+            <div class="leo-person-sub"><?php echo htmlspecialchars($e['created_at'] ?? ''); ?></div>
+        </div>
+        <div class="leo-person-value down">TSH <?php echo number_format($e['amount'] ?? 0, 0); ?></div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<a href="expense-add.php" class="leo-fab"><i class="fas fa-plus"></i></a>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

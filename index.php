@@ -1,119 +1,174 @@
 <?php
-// index.php
-require_once 'includes/header.php';
+$page_title = 'Dashboard';
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/includes/header.php';
 
-// Fetch Saved System Settings from Database
-$raw_settings = $pdo->query("SELECT setting_key, setting_value FROM settings")->fetchAll(PDO::FETCH_KEY_PAIR);
-$package_status = $raw_settings['system_status'] ?? 'FULL SYSTEM';
-$days_left = 'ALWAYS ACTIVE';
-
-// Fetch Today's Financial Totals (SQL)
-$today = date('Y-m-d');
-
-// Today's Sales (Includes product sales and service transactions)
-$sales_stmt = $pdo->prepare("SELECT SUM(total_amount) AS total_sales FROM sales WHERE DATE(created_at) = ?");
-$sales_stmt->execute([$today]);
-$today_sales = $sales_stmt->fetch()['total_sales'] ?? 0;
-
-// Today's Expenses
-$expenses_stmt = $pdo->prepare("SELECT SUM(amount) AS total_expenses FROM expenses WHERE DATE(created_at) = ?");
-$expenses_stmt->execute([$today]);
-$today_expenses = $expenses_stmt->fetch()['total_expenses'] ?? 0;
-
-// Net Income / Profit Calculation
-$net_profit = $today_sales - $today_expenses;
+$sales = $income = $profit = $expenses = 0;
+try {
+    $sales = $pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM sales")->fetchColumn();
+    $expenses = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM expenses")->fetchColumn();
+} catch (Exception $e) {}
+$income = $sales;
+$profit = $sales - $expenses;
 ?>
 
-<!-- Date Bar -->
-<div class="card" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 15px;">
-    <div style="display: flex; align-items: center; gap: 8px; color: var(--primary-green); font-weight: 600; font-size: 13px;">
-        <i class="fa-regular fa-clock" style="font-size: 16px;"></i>
-        <span>TODAY, <?php echo strtoupper(date('l, F j, Y')); ?></span>
-    </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
-        <a href="settings.php" title="System Settings" style="color: var(--text-muted); text-decoration: none;">
-            <i class="fa-solid fa-gear" style="font-size: 16px; cursor: pointer;"></i>
+<!-- DATE BAR -->
+<div class="leo-home-date">
+    <span class="leo-home-date-icon"><i class="fas fa-clock"></i></span>
+    <span class="leo-home-date-text" id="leoDateText">
+        TODAY, <?php echo strtoupper(date('l F j')); ?>
+    </span>
+    <button class="leo-home-date-eye" onclick="toggleDate()">
+        <i class="fas fa-eye" id="leoDateEye"></i>
+    </button>
+</div>
+
+<!-- WELCOME -->
+<div class="leo-home-welcome">Welcome, Here is your Business Overview</div>
+
+<!-- TODAY'S SUMMARY -->
+<div class="leo-summary">
+    <div class="leo-summary-top">
+        <span class="leo-summary-heading">Today's Summary</span>
+        <a href="reports.php" class="leo-summary-viewall">
+            View All
+            <span class="leo-summary-viewall-circle"><i class="fas fa-chevron-right"></i></span>
         </a>
-        <i class="fa-regular fa-eye" style="color: var(--text-muted); cursor: pointer;"></i>
     </div>
-</div>
-
-<!-- Business Overview Summary -->
-<div class="card summary-card">
-    <div class="summary-title">
-        <span>Today's Summary</span>
-        <a href="reports.php" style="color: #fff; text-decoration: none; font-size: 12px; opacity: 0.9;">View All <i class="fa-solid fa-chevron-right"></i></a>
-    </div>
-    <div class="summary-grid">
-        <div class="stat-box">
-            <div class="stat-label">Sales</div>
-            <div class="stat-value">TSH <?php echo number_format($today_sales, 0); ?></div>
+    <div class="leo-summary-grid">
+        <div class="leo-summary-cell">
+            <div class="leo-summary-cell-label">Sales</div>
+            <div class="leo-summary-cell-value">TSH <?php echo number_format($sales, 0); ?></div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Net Income</div>
-            <div class="stat-value">TSH <?php echo number_format($today_sales, 0); ?></div>
+        <div class="leo-summary-cell">
+            <div class="leo-summary-cell-label">Net Income</div>
+            <div class="leo-summary-cell-value">TSH <?php echo number_format($income, 0); ?></div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Net Profit</div>
-            <div class="stat-value">TSH <?php echo number_format($net_profit, 0); ?></div>
+        <div class="leo-summary-cell">
+            <div class="leo-summary-cell-label">Net Profit</div>
+            <div class="leo-summary-cell-value">TSH <?php echo number_format($profit, 0); ?></div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Expenses</div>
-            <div class="stat-value">TSH <?php echo number_format($today_expenses, 0); ?></div>
+        <div class="leo-summary-cell">
+            <div class="leo-summary-cell-label">Expenses</div>
+            <div class="leo-summary-cell-value">TSH <?php echo number_format($expenses, 0); ?></div>
         </div>
     </div>
 </div>
 
-<!-- System Status Banner -->
-<div class="card" style="display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary-green);">
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <i class="fa-solid fa-shield-halved" style="color: var(--primary-green); font-size: 24px;"></i>
-        <div>
-            <strong style="font-size: 14px; display: block; color: var(--text-main);"><?php echo htmlspecialchars($package_status); ?></strong>
-            <span style="font-size: 12px; color: var(--primary-green); font-weight: 600;"><?php echo $days_left; ?></span>
+<!-- TARGET -->
+<div class="leo-target">
+    <span class="leo-target-bullseye"><i class="fas fa-bullseye"></i></span>
+    <div class="leo-target-main">
+        <div class="leo-target-top">
+            <span class="leo-target-month">
+                <i class="far fa-calendar-alt"></i> <?php echo date('F Y'); ?>
+            </span>
+            <button class="leo-target-set-btn">Set target</button>
+        </div>
+        <div class="leo-target-title">No revenue target yet</div>
+        <div class="leo-target-desc">
+            Set a target for <?php echo date('F Y'); ?> to track posted sales against your target.
         </div>
     </div>
-    <i class="fa-solid fa-circle-check" style="color: var(--primary-green); font-size: 20px;"></i>
 </div>
 
-<!-- 3x3 Menu Action Grid -->
-<div class="menu-grid">
-    <a href="products.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-box-archive"></i></div>
-        <div class="grid-title">Record<br>Products</div>
+<!-- PACKAGE -->
+<div class="leo-package">
+    <span class="leo-package-shield"><i class="fas fa-shield-alt"></i></span>
+    <div class="leo-package-main">
+        <div class="leo-package-title">Free Package</div>
+        <div class="leo-package-sub">4 Days left</div>
+    </div>
+    <span class="leo-package-play"><i class="fas fa-play"></i></span>
+</div>
+
+<!-- QUICK 3 -->
+<div class="leo-quick3">
+    <a href="product-add.php" class="leo-quick3-btn">
+        <span class="leo-quick3-icon"><i class="fas fa-cubes"></i></span>
+        <span class="leo-quick3-label">Record<br>Products</span>
     </a>
-    <a href="customers.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-users-gear"></i></div>
-        <div class="grid-title">Record<br>Customers</div>
+    <a href="customer-add.php" class="leo-quick3-btn">
+        <span class="leo-quick3-icon"><i class="fas fa-user-plus"></i></span>
+        <span class="leo-quick3-label">Record<br>Customers</span>
     </a>
-    <a href="sales.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-        <div class="grid-title">Record<br>Sales</div>
-    </a>
-    <a href="products.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-cart-flatbed"></i></div>
-        <div class="grid-title">Record<br>Purchases</div>
-    </a>
-    <a href="expenses.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-        <div class="grid-title">Record<br>Expenses</div>
-    </a>
-    <a href="dues.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-        <div class="grid-title">Dues<br>List</div>
-    </a>
-    <a href="services.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-hand-holding-hand"></i></div>
-        <div class="grid-title">Record<br>Services</div>
-    </a>
-    <a href="settings.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-gear"></i></div>
-        <div class="grid-title">System<br>Settings</div>
-    </a>
-    <a href="reports.php" class="grid-card">
-        <div class="grid-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <div class="grid-title">Sales<br>Report</div>
+    <a href="sale-add.php" class="leo-quick3-btn">
+        <span class="leo-quick3-icon"><i class="fas fa-cart-plus"></i></span>
+        <span class="leo-quick3-label">Record<br>Sales</span>
     </a>
 </div>
 
-<?php require_once 'includes/nav.php'; ?>
+<!-- GRID 3x3 — FEATURES ZOTE -->
+<div class="leo-menu-grid">
+    <a href="product-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-cubes"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Products</span>
+    </a>
+    <a href="customer-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-user-plus"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Customers</span>
+    </a>
+    <a href="sale-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-cart-plus"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Sales</span>
+    </a>
+
+    <a href="purchase-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Purchases</span>
+    </a>
+    <a href="expense-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Expenses</span>
+    </a>
+    <a href="dues.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-clipboard-list"></i></span>
+        <span class="leo-menu-grid-label">Dues List</span>
+    </a>
+
+    <a href="service-add.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-hands-helping"></i></span>
+        <span class="leo-menu-grid-label">Record<br>Services</span>
+    </a>
+    <a href="products.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-boxes"></i></span>
+        <span class="leo-menu-grid-label">Products List</span>
+    </a>
+    <a href="report-sales.php" class="leo-menu-grid-btn">
+        <span class="leo-menu-grid-icon"><i class="fas fa-chart-line"></i></span>
+        <span class="leo-menu-grid-label">Sales Report</span>
+    </a>
+</div>
+
+<!-- UPDATES BANNER -->
+<div class="leo-updates-title">Updates and System Usages</div>
+<div class="leo-banner-card">
+    <div class="leo-banner-top-line"></div>
+    <div class="leo-banner-brand">LEO SALES</div>
+    <div class="leo-banner-tagline">The Comprehensive</div>
+    <div class="leo-banner-manual">MANUAL GUIDE BOOK</div>
+    <div class="leo-banner-footer">Read the book to get full insight</div>
+    <div class="leo-banner-book">
+        <i class="fas fa-book-open"></i>
+    </div>
+</div>
+
+<script>
+var dateHidden = false;
+function toggleDate() {
+    var text = document.getElementById('leoDateText');
+    var eye = document.getElementById('leoDateEye');
+    dateHidden = !dateHidden;
+    if (dateHidden) {
+        text.textContent = 'TODAY, **********';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+    } else {
+        text.textContent = 'TODAY, <?php echo strtoupper(date('l F j')); ?>';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+    }
+}
+</script>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

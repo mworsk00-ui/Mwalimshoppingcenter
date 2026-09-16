@@ -1,93 +1,96 @@
 <?php
-// customers.php
-require_once 'includes/header.php';
+$page_title = 'Add Customer';
+require_once __DIR__ . '/config/db.php';
 
-$message = '';
-
-// Handle Delete Customer
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-    $stmt = $pdo->prepare("DELETE FROM customers WHERE id = ?");
-    if ($stmt->execute([$id])) {
-        $message = '<div style="color: red; font-weight: 600; margin-bottom: 10px;">Customer removed!</div>';
-    }
-}
-
-// Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['customer_name']);
-    $phone = trim($_POST['phone']);
-    $edit_id = !empty($_POST['edit_id']) ? intval($_POST['edit_id']) : null;
-
-    if (!empty($name)) {
-        if ($edit_id) {
-            $stmt = $pdo->prepare("UPDATE customers SET customer_name = ?, phone = ? WHERE id = ?");
-            $stmt->execute([$name, $phone, $edit_id]);
-            $message = '<div style="color: var(--primary-green); font-weight: 600; margin-bottom: 10px;">Customer profile updated!</div>';
-        } else {
-            $stmt = $pdo->prepare("INSERT INTO customers (customer_name, phone) VALUES (?, ?)");
+    $name = trim($_POST['customer_name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    if ($name !== '') {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO customers (customer_name, phone) VALUES (?,?)");
             $stmt->execute([$name, $phone]);
-            $message = '<div style="color: var(--primary-green); font-weight: 600; margin-bottom: 10px;">Customer added!</div>';
-        }
+            header('Location: customers.php');
+            exit;
+        } catch (Exception $e) {}
     }
 }
-
-// Fetch edit target
-$edit_cust = null;
-if (isset($_GET['edit'])) {
-    $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
-    $stmt->execute([intval($_GET['edit'])]);
-    $edit_cust = $stmt->fetch();
-}
-
-$customers = $pdo->query("SELECT * FROM customers ORDER BY id DESC")->fetchAll();
+require_once __DIR__ . '/includes/header.php';
 ?>
+<header class="leo-page-header">
+    <div class="leo-page-header-left">
+        <a href="customers.php" class="leo-back-btn"><i class="fas fa-chevron-left"></i></a>
+        <span class="leo-page-header-title">Please Add a Customer</span>
+    </div>
+    <div class="leo-page-header-actions">
+        <button type="submit" form="custForm" class="leo-save-btn">SAVE</button>
+    </div>
+</header>
 
-<!-- Form Card -->
-<div class="card">
-    <h3 style="font-size: 15px; color: var(--primary-green); margin-bottom: 12px;">
-        <i class="fa-solid <?php echo $edit_cust ? 'fa-pen-to-square' : 'fa-user-plus'; ?>"></i>
-        <?php echo $edit_cust ? 'Edit Customer' : 'Record Customer'; ?>
-    </h3>
-    <?php echo $message; ?>
-    <form action="customers.php" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="hidden" name="edit_id" value="<?php echo $edit_cust['id'] ?? ''; ?>">
-        <input type="text" name="customer_name" placeholder="Customer Name" value="<?php echo htmlspecialchars($edit_cust['customer_name'] ?? ''); ?>" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
-        <input type="tel" name="phone" placeholder="Phone Number" value="<?php echo htmlspecialchars($edit_cust['phone'] ?? ''); ?>" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
-        
-        <button type="submit" style="background: var(--primary-green); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer;">
-            <?php echo $edit_cust ? 'Update Customer' : 'Save Customer'; ?>
-        </button>
-        <?php if ($edit_cust): ?>
-            <a href="customers.php" style="text-align: center; color: #888; font-size: 12px; text-decoration: none;">Cancel Edit</a>
-        <?php endif; ?>
-    </form>
-</div>
+<form method="post" id="custForm" class="leo-form-card" style="margin:0.85rem;">
+    <div class="leo-form-card-body">
 
-<!-- Customer Directory -->
-<div class="card">
-    <h3 style="font-size: 15px; color: var(--dark-forest); margin-bottom: 12px;"><i class="fa-solid fa-address-book"></i> Customer Directory</h3>
-    <?php if (empty($customers)): ?>
-        <p style="color: var(--text-muted); font-size: 13px;">No customers recorded yet.</p>
-    <?php else: ?>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <?php foreach ($customers as $cust): ?>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-light); border-radius: 6px;">
-                    <div>
-                        <strong style="font-size: 14px; display: block; color: var(--text-main);"><?php echo htmlspecialchars($cust['customer_name']); ?></strong>
-                        <span style="font-size: 12px; color: var(--text-muted);"><i class="fa-solid fa-phone"></i> <?php echo htmlspecialchars($cust['phone'] ?: 'N/A'); ?></span>
-                    </div>
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <span style="font-weight: 700; color: <?php echo $cust['dues_amount'] > 0 ? '#d32f2f' : 'var(--primary-green)'; ?>; font-size: 13px;">
-                            TSH <?php echo number_format($cust['dues_amount'], 0); ?>
-                        </span>
-                        <a href="customers.php?edit=<?php echo $cust['id']; ?>" style="color: #0288d1; text-decoration: none;"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <a href="customers.php?delete=<?php echo $cust['id']; ?>" onclick="return confirm('Delete customer profile?');" style="color: #d32f2f; text-decoration: none;"><i class="fa-solid fa-trash"></i></a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+        <div class="leo-form-row">
+            <label class="leo-input-label">Name</label>
+            <div class="leo-input-row">
+                <input type="text" name="customer_name" class="leo-input" placeholder="Enter customer name" required>
+                <span class="leo-input-row-icon"><i class="fas fa-address-card"></i></span>
+            </div>
         </div>
-    <?php endif; ?>
+
+        <div style="text-align:center;margin:1rem 0;">
+            <div style="width:100px;height:100px;border-radius:14px;background:var(--leo-blue-soft);display:inline-flex;align-items:center;justify-content:center;color:var(--leo-primary);font-size:2.5rem;">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-input-label">Phone Number</label>
+            <input type="tel" name="phone" class="leo-input" placeholder="Enter your phone number" style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-form-radio-row">
+                <span class="leo-form-radio checked"></span>
+                <span class="leo-form-radio-label">End Customer (Retailer)</span>
+            </label>
+            <label class="leo-form-radio-row">
+                <span class="leo-form-radio"></span>
+                <span class="leo-form-radio-label">Wholesaler</span>
+            </label>
+            <label class="leo-form-radio-row">
+                <span class="leo-form-radio"></span>
+                <span class="leo-form-radio-label">Dealer</span>
+            </label>
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-input-label">Email Address</label>
+            <input type="email" name="email" class="leo-input" placeholder="Enter email address" style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-input-label">Taxpayer Identification Number</label>
+            <input type="text" name="tin" class="leo-input" placeholder="Enter taxpayer identification number" style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-input-label">Address</label>
+            <input type="text" name="address" class="leo-input" placeholder="Enter personal address" style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
+        </div>
+
+        <div class="leo-form-row">
+            <label class="leo-input-label">Previous Due</label>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <input type="number" name="due" class="leo-input" placeholder="Amount" style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
+                <span style="font-size:0.75rem;color:var(--leo-muted);text-align:right;">Customer<br>Signature</span>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="leo-bottom-actions">
+    <a href="customers.php" class="leo-btn leo-btn--outline">CANCEL</a>
+    <button type="submit" form="custForm" class="leo-btn leo-btn--primary">SAVE</button>
 </div>
 
-<?php require_once 'includes/nav.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

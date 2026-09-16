@@ -1,122 +1,183 @@
+cat > ~/Mwalimshoppingcenter/reports.php << 'PHPEOF'
 <?php
-// reports.php
-require_once 'includes/header.php';
-
-// Determine active filter (default: today)
-$filter = $_GET['filter'] ?? 'today';
-
-// SQL Date condition mapping
-switch ($filter) {
-    case 'week':
-        $date_condition = "YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)";
-        $filter_label = "This Week";
-        break;
-    case 'month':
-        $date_condition = "MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())";
-        $filter_label = "This Month (" . date('F Y') . ")";
-        break;
-    case 'year':
-        $date_condition = "YEAR(created_at) = YEAR(CURDATE())";
-        $filter_label = "This Year (" . date('Y') . ")";
-        break;
-    case 'today':
-    default:
-        $date_condition = "DATE(created_at) = CURDATE()";
-        $filter_label = "Today (" . date('M j, Y') . ")";
-        break;
-}
-
-// Dynamic Filtered Calculations
-$filtered_sales_stmt = $pdo->query("SELECT SUM(total_amount) AS total FROM sales WHERE {$date_condition}");
-$filtered_sales = $filtered_sales_stmt->fetch()['total'] ?? 0;
-
-$filtered_expenses_stmt = $pdo->query("SELECT SUM(amount) AS total FROM expenses WHERE {$date_condition}");
-$filtered_expenses = $filtered_expenses_stmt->fetch()['total'] ?? 0;
-
-$filtered_profit = $filtered_sales - $filtered_expenses;
-
-// Overall Lifetime Totals
-$total_sales = $pdo->query("SELECT SUM(total_amount) AS total FROM sales")->fetch()['total'] ?? 0;
-$total_expenses = $pdo->query("SELECT SUM(amount) AS total FROM expenses")->fetch()['total'] ?? 0;
-$net_profit = $total_sales - $total_expenses;
-
-// Low Stock Alert (Products with 5 or fewer items remaining)
-$low_stock_products = $pdo->query("SELECT * FROM products WHERE stock_qty <= 5 ORDER BY stock_qty ASC")->fetchAll();
+$page_title = 'Reports';
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- Timeframe Filter Buttons Bar -->
-<div class="card" style="padding: 8px; margin-bottom: 12px;">
-    <div style="display: flex; gap: 6px; justify-content: space-between;">
-        <a href="reports.php?filter=today" style="flex: 1; text-align: center; padding: 8px 4px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; background: <?php echo $filter === 'today' ? 'var(--primary-green)' : '#f0f0f0'; ?>; color: <?php echo $filter === 'today' ? '#fff' : '#333'; ?>;">
-            Day
+<div class="leo-section" style="margin-top:0.5rem;">
+    <div class="leo-section-card">
+
+        <a href="report-business-insights.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-th-large"></i></span>
+            <span class="leo-menu-item-label">Business Insights</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
         </a>
-        <a href="reports.php?filter=week" style="flex: 1; text-align: center; padding: 8px 4px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; background: <?php echo $filter === 'week' ? 'var(--primary-green)' : '#f0f0f0'; ?>; color: <?php echo $filter === 'week' ? '#fff' : '#333'; ?>;">
-            Week
+
+        <a href="report-sales.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-shopping-cart"></i></span>
+            <span class="leo-menu-item-label">Sales Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
         </a>
-        <a href="reports.php?filter=month" style="flex: 1; text-align: center; padding: 8px 4px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; background: <?php echo $filter === 'month' ? 'var(--primary-green)' : '#f0f0f0'; ?>; color: <?php echo $filter === 'month' ? '#fff' : '#333'; ?>;">
-            Month
+
+        <a href="report-daily-sales.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-shopping-bag"></i></span>
+            <span class="leo-menu-item-label">Daily Sales Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
         </a>
-        <a href="reports.php?filter=year" style="flex: 1; text-align: center; padding: 8px 4px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; background: <?php echo $filter === 'year' ? 'var(--primary-green)' : '#f0f0f0'; ?>; color: <?php echo $filter === 'year' ? '#fff' : '#333'; ?>;">
-            Year
+
+        <a href="report-product-sales.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-chart-pie"></i></span>
+            <span class="leo-menu-item-label">Product Sales Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
         </a>
+
+        <a href="report-employee.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-user-circle"></i></span>
+            <span class="leo-menu-item-label">Employee Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-products-performance.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-chart-line"></i></span>
+            <span class="leo-menu-item-label">Products Performance Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-inventory-tracking.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-boxes"></i></span>
+            <span class="leo-menu-item-label">Inventory Tracking Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-major-shops.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-store"></i></span>
+            <span class="leo-menu-item-label">Major Shops Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-major-shops-transactions.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-store-alt"></i></span>
+            <span class="leo-menu-item-label">Major Shops Transactions Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-stock-transfer.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-exchange-alt"></i></span>
+            <span class="leo-menu-item-label">Stock Transfer Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-stock-tracking.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-cubes"></i></span>
+            <span class="leo-menu-item-label">Stock Tracking Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-purchases.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-clipboard-check"></i></span>
+            <span class="leo-menu-item-label">Purchases Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-profit-loss.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-hand-holding-usd"></i></span>
+            <span class="leo-menu-item-label">Profit and Loss Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-dues-list.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-coins"></i></span>
+            <span class="leo-menu-item-label">Dues List Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-dues-payment.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+            <span class="leo-menu-item-label">Dues Payment Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-prepaid-list.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-hand-holding-heart"></i></span>
+            <span class="leo-menu-item-label">Prepaid List Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-prepaid-transactions.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-file-invoice"></i></span>
+            <span class="leo-menu-item-label">Prepaid Transactions Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-stock.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-warehouse"></i></span>
+            <span class="leo-menu-item-label">Stock Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-general.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-file-alt"></i></span>
+            <span class="leo-menu-item-label">General Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-services.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-briefcase"></i></span>
+            <span class="leo-menu-item-label">Services Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-stock-expired.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-chart-area"></i></span>
+            <span class="leo-menu-item-label">Stock and Expired Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-pending-approvals.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-box-open"></i></span>
+            <span class="leo-menu-item-label">Pending Approvals</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-adjustment-history.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-edit"></i></span>
+            <span class="leo-menu-item-label">Adjustment History</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-expenses.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-wallet"></i></span>
+            <span class="leo-menu-item-label">Expenses Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-customers.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-users"></i></span>
+            <span class="leo-menu-item-label">Customers Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-pickup.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-truck-loading"></i></span>
+            <span class="leo-menu-item-label">Pickup Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-sales-return.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-undo"></i></span>
+            <span class="leo-menu-item-label">Sales Return Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
+        <a href="report-purchases-return.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-file-import"></i></span>
+            <span class="leo-menu-item-label">Purchases Return Report</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-play"></i></span>
+        </a>
+
     </div>
 </div>
 
-<!-- Revenue Target / Goal Progress Card (Filtered) -->
-<div class="card summary-card">
-    <div class="summary-title">
-        <span>Performance Summary</span>
-        <span style="font-size: 11px; opacity: 0.85;"><?php echo $filter_label; ?></span>
-    </div>
-    <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <div>
-            <div style="font-size: 11px; opacity: 0.9;">Total Revenue</div>
-            <div style="font-size: 18px; font-weight: 700; margin-top: 2px;">TSH <?php echo number_format($filtered_sales, 0); ?></div>
-        </div>
-        <div>
-            <div style="font-size: 11px; opacity: 0.9;">Net Profit</div>
-            <div style="font-size: 18px; font-weight: 700; margin-top: 2px;">TSH <?php echo number_format($filtered_profit, 0); ?></div>
-        </div>
-    </div>
-</div>
-
-<!-- All-Time Financial Overview -->
-<div class="card">
-    <h3 style="font-size: 15px; color: var(--dark-forest); margin-bottom: 12px;"><i class="fa-solid fa-chart-pie"></i> Lifetime Overview</h3>
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--bg-light); border-radius: 6px;">
-            <span style="font-size: 13px; font-weight: 500;">Total Sales Recorded:</span>
-            <strong style="color: var(--primary-green); font-size: 14px;">TSH <?php echo number_format($total_sales, 0); ?></strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--bg-light); border-radius: 6px;">
-            <span style="font-size: 13px; font-weight: 500;">Total Expenses Recorded:</span>
-            <strong style="color: #d32f2f; font-size: 14px;">TSH <?php echo number_format($total_expenses, 0); ?></strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--accent-green); border-radius: 6px; border: 1px solid var(--accent-green-border);">
-            <span style="font-size: 13px; font-weight: 700; color: var(--dark-forest);">Net Profit:</span>
-            <strong style="color: var(--primary-green-dark); font-size: 15px;">TSH <?php echo number_format($net_profit, 0); ?></strong>
-        </div>
-    </div>
-</div>
-
-<!-- Stock Inventory Alerts -->
-<div class="card">
-    <h3 style="font-size: 15px; color: #d32f2f; margin-bottom: 12px;"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock Warnings</h3>
-    <?php if (empty($low_stock_products)): ?>
-        <p style="color: var(--primary-green); font-size: 13px; font-weight: 500;">All inventory levels are healthy!</p>
-    <?php else: ?>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <?php foreach ($low_stock_products as $item): ?>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fff3e0; border-radius: 6px; border-left: 3px solid #ff9800;">
-                    <div>
-                        <strong style="font-size: 13px; display: block; color: var(--text-main);"><?php echo htmlspecialchars($item['product_name']); ?></strong>
-                        <span style="font-size: 11px; color: #e65100; font-weight: 600;">Only <?php echo $item['stock_qty']; ?> items left in stock</span>
-                    </div>
-                    <a href="products.php" style="font-size: 12px; color: var(--primary-green); text-decoration: none; font-weight: bold;">Restock</a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-</div>
-
-<?php require_once 'includes/nav.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+PHPEOF
