@@ -1,0 +1,24 @@
+mwalimu_shopping_center/
+├── config/
+│   └── db.php
+├── includes/
+│   ├── header.php
+│   ├── footer.php
+│   └── nav.php
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── main.js
+├── actions/
+│   ├── save_product.php
+│   ├── save_sale.php
+│   ├── save_expense.php
+│   └── save_customer.php
+├── index.php
+├── products.php
+├── sales.php
+├── expenses.php
+├── customers.php
+├── dues.php
+└── reports.php
