@@ -101,4 +101,4 @@ $service_history = $pdo->query("SELECT sales.*, customers.customer_name FROM sal
     <?php endif; ?>
 </div>
 
-<?php require_once 'includes/nav.php'; ?>
+<?php require_once 'includes/footer.php'; ?>
