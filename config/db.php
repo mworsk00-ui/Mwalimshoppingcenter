@@ -1,11 +1,11 @@
 <?php
 // config/db.php
 
-// Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');       // Replace with your database username
-define('DB_PASS', '');           // Replace with your database password
-define('DB_NAME', 'mwalimu_shop');
+// Database Configuration for InfinityFree
+define('DB_HOST', 'sql201.infinityfree.com');
+define('DB_USER', 'if0_42727461');
+define('DB_PASS', 'Mmcenter2026');
+define('DB_NAME', 'if0_42727461_mwalimu_shop');
 
 try {
     // Establish PDO connection
