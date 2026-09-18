@@ -24,3 +24,8 @@ TestResults.xmlconfig/db.php
 database.sql
 *.bak
 *.old
+config/db.php
+*.bak*
+*.old
+*.sql
+database.sql

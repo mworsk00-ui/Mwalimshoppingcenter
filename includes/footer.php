@@ -38,11 +38,17 @@ window.addEventListener('load', function() {
     }, 600);
 });
 
-// Haptic feedback
-document.querySelectorAll('.leo-nav-item, .leo-quick-btn').forEach(function(el) {
-    el.addEventListener('click', function() {
-        if (navigator.vibrate) navigator.vibrate(8);
-    });
+// data-confirm handler — mwenzako anatumia hii
+document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-confirm]');
+    if (!el) return;
+    if (el.tagName === 'A' && el.getAttribute('href')) {
+        e.preventDefault();
+        var msg = el.getAttribute('data-confirm') || 'Are you sure?';
+        if (confirm(msg)) {
+            window.location.href = el.getAttribute('href');
+        }
+    }
 });
 </script>
 </body>
