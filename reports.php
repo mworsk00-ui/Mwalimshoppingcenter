@@ -1,4 +1,4 @@
-cat > ~/Mwalimshoppingcenter/reports.php << 'PHPEOF'
+
 <?php
 $page_title = 'Reports';
 require_once __DIR__ . '/config/db.php';

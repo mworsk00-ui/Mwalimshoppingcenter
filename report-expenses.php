@@ -1,5 +1,5 @@
 <?php
-$page_title = 'Sales Report';
+$page_title = 'Expenses Report';
 require_once __DIR__ . '/config/db.php';
 
 $period = $_GET['period'] ?? 'today';
@@ -16,55 +16,44 @@ $where = match($period) {
 
 $rows = []; $total = 0;
 try {
-    $stmt = $pdo->query("SELECT s.*, c.customer_name FROM sales s LEFT JOIN customers c ON s.customer_id=c.id WHERE $where ORDER BY s.id DESC");
-    $rows = $stmt->fetchAll();
-    $total = $pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM sales WHERE $where")->fetchColumn();
+    $rows = $pdo->query("SELECT * FROM expenses WHERE $where ORDER BY id DESC")->fetchAll();
+    $total = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE $where")->fetchColumn();
 } catch (Exception $e) {}
-
 require_once __DIR__ . '/includes/header.php';
 ?>
 <header class="leo-page-header">
     <div class="leo-page-header-left">
         <a href="reports.php" class="leo-back-btn"><i class="fas fa-chevron-left"></i></a>
-        <span class="leo-page-header-title">Sales Report</span>
+        <span class="leo-page-header-title">Expenses Report</span>
     </div>
 </header>
 <div style="padding:0.85rem;">
     <div class="leo-report-filter">
         <div class="leo-report-dates">
-            <div class="leo-report-date">
-                <div class="leo-report-date-label">From Date</div>
-                <div class="leo-report-date-value"><span><?php echo date('M j, Y'); ?></span><i class="far fa-calendar-alt" style="margin-left:auto;"></i></div>
-            </div>
-            <div class="leo-report-date">
-                <div class="leo-report-date-label">To Date</div>
-                <div class="leo-report-date-value"><span><?php echo date('M j, Y'); ?></span><i class="far fa-calendar-alt" style="margin-left:auto;"></i></div>
-            </div>
+            <div class="leo-report-date"><div class="leo-report-date-label">From Date</div><div class="leo-report-date-value"><span><?php echo date('M j, Y'); ?></span><i class="far fa-calendar-alt" style="margin-left:auto;"></i></div></div>
+            <div class="leo-report-date"><div class="leo-report-date-label">To Date</div><div class="leo-report-date-value"><span><?php echo date('M j, Y'); ?></span><i class="far fa-calendar-alt" style="margin-left:auto;"></i></div></div>
         </div>
         <div class="leo-report-total">
             <div class="leo-report-total-left">
                 <div class="leo-report-total-amount">TSH <?php echo number_format($total, 0); ?></div>
-                <div class="leo-report-total-label">Total Sales</div>
+                <div class="leo-report-total-label">Total Expenses</div>
             </div>
             <?php include __DIR__ . '/includes/period_dropdown.php'; ?>
         </div>
     </div>
 </div>
 <?php if (empty($rows)): ?>
-<div class="leo-empty">
-    <div class="leo-empty-img"><i class="fas fa-chart-line"></i></div>
-    <h4>No sales in this period</h4>
-</div>
+<div class="leo-empty"><div class="leo-empty-img"><i class="fas fa-wallet"></i></div><h4>No data available</h4></div>
 <?php else: ?>
 <div class="leo-section-card" style="margin:0 0.85rem;">
     <?php foreach ($rows as $r): ?>
     <div class="leo-person-item">
-        <div class="leo-person-avatar" style="background:#E8F8EE;color:#10B981;"><i class="fas fa-receipt"></i></div>
+        <div class="leo-person-avatar" style="background:#FEF0F0;color:#EF4444;"><i class="fas fa-wallet"></i></div>
         <div class="leo-person-body">
-            <div class="leo-person-name"><?php echo htmlspecialchars($r['customer_name'] ?? 'Walk-in'); ?></div>
-            <div class="leo-person-sub"><?php echo date('M j, Y', strtotime($r['created_at'])); ?> · <?php echo htmlspecialchars($r['payment_status'] ?? 'paid'); ?></div>
+            <div class="leo-person-name"><?php echo htmlspecialchars($r['title'] ?? 'Expense'); ?></div>
+            <div class="leo-person-sub"><?php echo date('M j, Y', strtotime($r['created_at'])); ?></div>
         </div>
-        <div class="leo-person-value up">TSH <?php echo number_format($r['total_amount'] ?? 0, 0); ?></div>
+        <div class="leo-person-value down">TSH <?php echo number_format($r['amount'], 0); ?></div>
     </div>
     <?php endforeach; ?>
 </div>

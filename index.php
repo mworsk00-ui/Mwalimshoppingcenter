@@ -55,33 +55,6 @@ $profit = $sales - $expenses;
     </div>
 </div>
 
-<!-- TARGET -->
-<div class="leo-target">
-    <span class="leo-target-bullseye"><i class="fas fa-bullseye"></i></span>
-    <div class="leo-target-main">
-        <div class="leo-target-top">
-            <span class="leo-target-month">
-                <i class="far fa-calendar-alt"></i> <?php echo date('F Y'); ?>
-            </span>
-            <button class="leo-target-set-btn">Set target</button>
-        </div>
-        <div class="leo-target-title">No revenue target yet</div>
-        <div class="leo-target-desc">
-            Set a target for <?php echo date('F Y'); ?> to track posted sales against your target.
-        </div>
-    </div>
-</div>
-
-<!-- PACKAGE -->
-<div class="leo-package">
-    <span class="leo-package-shield"><i class="fas fa-shield-alt"></i></span>
-    <div class="leo-package-main">
-        <div class="leo-package-title">Free Package</div>
-        <div class="leo-package-sub">4 Days left</div>
-    </div>
-    <span class="leo-package-play"><i class="fas fa-play"></i></span>
-</div>
-
 <!-- QUICK 3 -->
 <div class="leo-quick3">
     <a href="product-add.php" class="leo-quick3-btn">
@@ -98,7 +71,7 @@ $profit = $sales - $expenses;
     </a>
 </div>
 
-<!-- GRID 3x3 — FEATURES ZOTE -->
+<!-- GRID 3x3 -->
 <div class="leo-menu-grid">
     <a href="product-add.php" class="leo-menu-grid-btn">
         <span class="leo-menu-grid-icon"><i class="fas fa-cubes"></i></span>
@@ -140,17 +113,13 @@ $profit = $sales - $expenses;
     </a>
 </div>
 
-<!-- UPDATES BANNER -->
-<div class="leo-updates-title">Updates and System Usages</div>
+<!-- BANNER YA MWALIMUSHOPPINGCENTER -->
 <div class="leo-banner-card">
     <div class="leo-banner-top-line"></div>
-    <div class="leo-banner-brand">LEO SALES</div>
-    <div class="leo-banner-tagline">The Comprehensive</div>
-    <div class="leo-banner-manual">MANUAL GUIDE BOOK</div>
-    <div class="leo-banner-footer">Read the book to get full insight</div>
-    <div class="leo-banner-book">
-        <i class="fas fa-book-open"></i>
-    </div>
+    <div class="leo-banner-brand">MWALIMUSHOPPINGCENTER</div>
+    <div class="leo-banner-tagline">Karibu kwenye mfumo wako wa biashara</div>
+    <div class="leo-banner-manual">SIMAMIA BIASHARA YAKO</div>
+    <div class="leo-banner-footer">Rahisi · Haraka · Salama — Endelea kufanya biashara kwa urahisi</div>
 </div>
 
 <script>
