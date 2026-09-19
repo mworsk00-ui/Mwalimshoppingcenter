@@ -36,6 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
+<style>
+    .pm-page-wrap { min-height: calc(100vh - 140px); display: flex; flex-direction: column; }
+    .pm-page-wrap .leo-form-card { flex: 1; }
+    .pm-bottom-actions {
+        position: sticky; bottom: 0; background: #fff;
+        border-top: 1px solid #E5EAF0; padding: 0.85rem 1rem;
+        display: flex; gap: 0.6rem; margin-top: auto;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+    }
+    .pm-bottom-actions .leo-btn { flex: 1; justify-content: center; text-align: center; }
+</style>
+
 <header class="leo-page-header">
     <div class="leo-page-header-left">
         <a href="categories.php" class="leo-back-btn"><i class="fas fa-chevron-left"></i></a>
@@ -46,7 +58,8 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </header>
 
-<form method="post" id="catForm" class="leo-form-card" style="margin:0.85rem;">
+<div class="pm-page-wrap">
+<form method="post" id="catForm" class="leo-form-card" style="margin:0.85rem;" data-loading="Updating…">
 <div class="leo-form-card-body">
 
     <div style="text-align:center;margin:0.5rem 0 1rem;">
@@ -75,23 +88,26 @@ require_once __DIR__ . '/includes/header.php';
         <label class="leo-input-label">Status</label>
         <select name="status" class="leo-input"
                 style="border:0;border-bottom:1px solid #E5EAF0;border-radius:0;padding-left:0;">
-            <option value="Active"   <?= ($c['status'] ?? 'Active') === 'Active'   ? 'selected' : '' ?>>Active</option>
-            <option value="Inactive" <?= ($c['status'] ?? 'Active') === 'Inactive' ? 'selected' : '' ?>>Inactive</option>
+            <option value="Active"   <?= $c['status'] === 'Active'   ? 'selected' : '' ?>>Active</option>
+            <option value="Inactive" <?= $c['status'] === 'Inactive' ? 'selected' : '' ?>>Inactive</option>
         </select>
     </div>
 
 </div>
 </form>
 
-<div class="leo-bottom-actions">
+<div class="pm-bottom-actions">
     <a href="categories.php?delete=<?= (int)$c['id'] ?>"
        data-confirm="Move '<?= htmlspecialchars($c['category_name'], ENT_QUOTES) ?>' to the Recycle Bin?"
+       data-confirm-ok="Yes, move to bin"
+       data-confirm-cancel="Cancel"
        class="leo-btn leo-btn--outline"
        style="flex:0.7;background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;">
         <i class="fas fa-trash"></i> DELETE
     </a>
     <a href="categories.php" class="leo-btn leo-btn--outline">CANCEL</a>
     <button type="submit" form="catForm" class="leo-btn leo-btn--primary">UPDATE</button>
+</div>
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

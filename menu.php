@@ -1,4 +1,3 @@
-cat > ~/Mwalimshoppingcenter/menu.php << 'PHPEOF'
 <?php
 $page_title = 'Menu';
 require_once __DIR__ . '/config/db.php';
@@ -48,38 +47,21 @@ require_once __DIR__ . '/includes/header.php';
             <span class="leo-menu-item-label">Employees</span>
             <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
-        <a href="announcements.php" class="leo-menu-item">
-            <span class="leo-menu-item-icon"><i class="fas fa-bullhorn"></i></span>
-            <span class="leo-menu-item-label">Announcements</span>
-            <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-        <a href="sms.php" class="leo-menu-item">
-            <span class="leo-menu-item-icon"><i class="fas fa-comment-sms"></i></span>
-            <span class="leo-menu-item-label">SMS Broadcasts</span>
-            <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
     </div>
 </div>
 
-<!-- HRM -->
+<!-- SUPPLIES / DELIVERIES -->
 <div class="leo-section">
-    <div class="leo-section-title">Human Resource Management</div>
+    <div class="leo-section-title">Supplies / Deliveries</div>
     <div class="leo-section-card">
-        <a href="hrm.php" class="leo-menu-item">
-            <span class="leo-menu-item-icon"><i class="fas fa-users-cog"></i></span>
-            <span class="leo-menu-item-label">Human Resources</span>
+        <a href="supplies.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-box-open"></i></span>
+            <span class="leo-menu-item-label">Supplies</span>
             <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
-    </div>
-</div>
-
-<!-- HOTEL -->
-<div class="leo-section">
-    <div class="leo-section-title">Hotel Management</div>
-    <div class="leo-section-card">
-        <a href="hotel.php" class="leo-menu-item">
-            <span class="leo-menu-item-icon"><i class="fas fa-hotel"></i></span>
-            <span class="leo-menu-item-label">Hotel Management</span>
+        <a href="supply-guide.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-circle-question"></i></span>
+            <span class="leo-menu-item-label">Supplies Guide</span>
             <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
     </div>
@@ -253,5 +235,21 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- SYSTEM -->
+<div class="leo-section">
+    <div class="leo-section-title">System</div>
+    <div class="leo-section-card">
+        <a href="recycle-bin.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-recycle"></i></span>
+            <span class="leo-menu-item-label">Recycle Bin</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <a href="recycle-bin-guide.php" class="leo-menu-item">
+            <span class="leo-menu-item-icon"><i class="fas fa-circle-question"></i></span>
+            <span class="leo-menu-item-label">Recycle Bin Guide</span>
+            <span class="leo-menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-PHPEOF
