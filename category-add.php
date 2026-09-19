@@ -25,6 +25,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
+<style>
+    .pm-page-wrap { min-height: calc(100vh - 140px); display: flex; flex-direction: column; }
+    .pm-page-wrap .leo-form-card { flex: 1; }
+    .pm-bottom-actions {
+        position: sticky; bottom: 0; background: #fff;
+        border-top: 1px solid #E5EAF0; padding: 0.85rem 1rem;
+        display: flex; gap: 0.6rem; margin-top: auto;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+    }
+    .pm-bottom-actions .leo-btn { flex: 1; justify-content: center; text-align: center; }
+</style>
+
 <header class="leo-page-header">
     <div class="leo-page-header-left">
         <a href="categories.php" class="leo-back-btn"><i class="fas fa-chevron-left"></i></a>
@@ -35,7 +47,8 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </header>
 
-<form method="post" id="catForm" class="leo-form-card" style="margin:0.85rem;">
+<div class="pm-page-wrap">
+<form method="post" id="catForm" class="leo-form-card" style="margin:0.85rem;" data-loading="Saving…">
 <div class="leo-form-card-body">
 
     <div style="text-align:center;margin:0.5rem 0 1rem;">
@@ -72,9 +85,10 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 </form>
 
-<div class="leo-bottom-actions">
+<div class="pm-bottom-actions">
     <a href="categories.php" class="leo-btn leo-btn--outline">CANCEL</a>
     <button type="submit" form="catForm" class="leo-btn leo-btn--primary">SAVE CATEGORY</button>
+</div>
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

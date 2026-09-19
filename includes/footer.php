@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/flash.php';   // flash() + flash_render()
 $current = basename($_SERVER['PHP_SELF'] ?? 'index.php');
 function nav_active($files, $current) {
     foreach ((array)$files as $f) {
@@ -38,18 +39,19 @@ window.addEventListener('load', function() {
     }, 600);
 });
 
-// data-confirm handler — mwenzako anatumia hii
-document.addEventListener('click', function(e) {
-    var el = e.target.closest('[data-confirm]');
-    if (!el) return;
-    if (el.tagName === 'A' && el.getAttribute('href')) {
-        e.preventDefault();
-        var msg = el.getAttribute('data-confirm') || 'Are you sure?';
-        if (confirm(msg)) {
-            window.location.href = el.getAttribute('href');
-        }
-    }
+// Haptic feedback
+document.querySelectorAll('.leo-nav-item, .leo-quick-btn').forEach(function(el) {
+    el.addEventListener('click', function() {
+        if (navigator.vibrate) navigator.vibrate(8);
+    });
 });
 </script>
+
+<!-- 1) Emit flash data FIRST so JS can read it -->
+<?php flash_render(); ?>
+
+<!-- 2) Then load the UI script that consumes it -->
+<?php require_once __DIR__ . '/leo-ui.php'; ?>
+
 </body>
 </html>

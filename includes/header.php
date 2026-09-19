@@ -1,7 +1,8 @@
 <?php
-$page_title = $page_title ?? 'Dashboard';
 if (session_status() === PHP_SESSION_NONE) session_start();
-$user_name = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Guest';
+
+$page_title = $page_title ?? 'Dashboard';
+$user_name = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Mwalimu';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +10,7 @@ $user_name = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Guest';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4A90E2">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Mwalim Shop">
     <title><?php echo $page_title; ?> | Mwalim Shop</title>
@@ -23,8 +25,15 @@ $user_name = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Guest';
     <p>Business Management</p>
 </div>
 
+<!-- SIDEBAR DRAWER -->
+<?php require_once __DIR__ . '/sidebar.php'; ?>
+
+<!-- HEADER -->
 <header class="leo-app-header">
     <div class="leo-app-header-left">
+        <button class="leo-hamburger" onclick="openDrawer()" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
         <div class="leo-app-avatar"><i class="fas fa-user"></i></div>
         <div class="leo-app-name"><?php echo htmlspecialchars($user_name); ?></div>
     </div>
@@ -37,11 +46,3 @@ $user_name = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Guest';
 </header>
 
 <main class="leo-app-content">
-<?php if (file_exists(__DIR__ . '/flash.php')) { require_once __DIR__ . '/flash.php'; } ?>
-<?php foreach (get_flashes() as $f): ?>
-<div style="margin:0.85rem;padding:0.75rem 1rem;border-radius:10px;font-size:0.87rem;
-    background:<?php echo $f['type']==='success'?'#DCFCE7':($f['type']==='error'?'#FEE2E2':($f['type']==='warning'?'#FEF3C7':'#DBEAFE')); ?>;
-    color:<?php echo $f['type']==='success'?'#166534':($f['type']==='error'?'#991B1B':($f['type']==='warning'?'#92400E':'#1E40AF')); ?>;">
-    <?php echo htmlspecialchars($f['message']); ?>
-</div>
-<?php endforeach; ?>
